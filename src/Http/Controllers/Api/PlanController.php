@@ -14,13 +14,10 @@ use Touge\AdminAliyunLive\Supports\AlibabaLiveClient;
 
 class PlanController extends BaseApiController
 {
-    protected $a= 86400;
     public function fetch_list()
     {
-
-        $s= date('Y-m-d H:i:s', time() - 3600);
-        $e= date('Y-m-d H:i:s',time() + $this->a);
-        $_plans= Plan::whereBetween('publish_at', [$s, $e])->get(['id','channel_id', 'room_id', 'title','anchor','publish_at']);
+        $select_filed= ['id','channel_id', 'room_id', 'title','anchor','publish_at','end_at'];
+        $_plans= Plan::where('end_at' ,'>' ,date('Y-m-d h:i:s'))->get($select_filed);
 
         $plans= [];
         foreach($_plans as $key=>$plan){
@@ -84,10 +81,21 @@ class PlanController extends BaseApiController
         }
 
         $plan= Plan::findOrFail($plan_id);
+
         $buildUrls= AlibabaLiveClient::liveUrlBuilder($plan->channel->name, $plan->room->name);
         $pull= $buildUrls['pull'];
 
-        return $this->success($pull);
+        $data= [
+            'plan'=> [
+                'id'=> $plan_id,
+                'title'=> $plan->title,
+                'anchor'=> $plan->anchor,
+                'publish_at'=> $plan->publish_at
+            ],
+            'urls'=> $pull
+        ];
+
+        return $this->success($data);
     }
 
 }

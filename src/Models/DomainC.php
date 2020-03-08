@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Request;
  * Class Domain
  * @package Touge\AdminAliyunLive\Models
  */
-class Domain extends Model
+class DomainC extends Model
 {
 
     /**

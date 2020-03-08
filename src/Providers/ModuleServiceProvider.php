@@ -28,6 +28,8 @@ class ModuleServiceProvider extends ServiceProvider
             );
         }
 
+        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'touge-aliyun');
+
         $this->app->booted(function () {
             AdminAliyunLive::routes(__DIR__.'/../../routes/web.php');
             static::api_routes(__DIR__ . '/../../routes/api.php');

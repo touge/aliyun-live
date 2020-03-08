@@ -26,15 +26,6 @@ class PlanController extends BaseAdminController
 
     protected $title = '直播计划';
 
-    protected $__= [
-        'status'=> '状态',
-        'channel'=> '频道',
-        'room'=> '房间',
-        'title'=> '名称',
-        'anchor'=> '主讲',
-        'publish_at'=> '计划时间',
-    ];
-
     /**
      * Make a show builder.
      *
@@ -49,13 +40,13 @@ class PlanController extends BaseAdminController
         $model= $show->getModel();
 
 
-        $show->field('channel-name', $this->__['channel'])->as(function(){
+        $show->field('channel-name', __('touge-aliyun::live.channel'))->as(function(){
             return $this->channel->name;
         });
-        $show->field('room-name', $this->__['room'])->as(function(){
+        $show->field('room-name', __('touge-aliyun::live.room'))->as(function(){
             return $this->room->name;
         });
-        $show->field('publish_at', $this->__['publish_at']);
+        $show->field('publish_at', __('touge-aliyun::live.publish_at'));
 
         /**
          * 当前频道，房间是否在线
@@ -74,20 +65,20 @@ class PlanController extends BaseAdminController
             }
         }
 
-        $show->field('online-status', $this->__['status'])->as(function() use($online_status){
+        $show->field('online-status', __('touge-aliyun::live.statusl'))->as(function() use($online_status){
             if($online_status){
-                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 推流中';
+                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
             }
-            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 已下线';
+            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> ' . __('touge-aliyun::live.push_end');;
         })->label('default');
 
 
         $buildUrls= AlibabaLiveClient::liveUrlBuilder($model->channel->name, $model->room->name);
         Show::extend('pull_urls', PullUrls::class);
-        $show->field('PULL-URLS', '拉流地址')->pull_urls($buildUrls['pull']);
+        $show->field('PULL-URLS', __('touge-aliyun::live.pull_url'))->pull_urls($buildUrls['pull']);
         
         Show::extend('push_url', PushUrl::class);
-        $show->field('PUSH-URL', '推流地址')->push_url($buildUrls['push']);
+        $show->field('PUSH-URL', __('touge-aliyun::live.push_url'))->push_url($buildUrls['push']);
 
         $show->panel()->tools(function(Show\Tools $tools){
             $tools->disableDelete()->disableEdit();
@@ -98,26 +89,28 @@ class PlanController extends BaseAdminController
 
     protected function grid(){
         $grid = new Grid(new Plan());
+        $grid->model()->orderBy('id', 'desc');
 
-        $grid->column('anchor', $this->__['anchor'])->label('default');
-        $grid->column('title', $this->__['title'])->label('warning');
-        $grid->column('channel.name', $this->__['channel'])->label('success');
-        $grid->column('room.name', $this->__['room'])->label('primary');
-        $grid->column('publish_at', $this->__['publish_at']);
+        $grid->column('publish_at', __('touge-aliyun::live.publish_at'));
+        $grid->column('anchor', __('touge-aliyun::live.anchor'))->label('default');
+        $grid->column('title', __('touge-aliyun::live.title'))->label('warning');
+        $grid->column('channel.name', __('touge-aliyun::live.channel'))->label('success');
+        $grid->column('room.name',__('touge-aliyun::live.room'))->label('primary');
+        $grid->column('end_at', __('touge-aliyun::live.end_at'));
 
         $OnlineInfo= $this->live_online_info();
-        $grid->column('app-status', $this->__['status'])->display(function() use($OnlineInfo){
+        $grid->column('app-status', __('touge-aliyun::live.statusl'))->display(function() use($OnlineInfo){
             $online= false;
             foreach((array)$OnlineInfo as $key=>$val){
-                if($val['AppName']==$this->app_name && $val['StreamName']== $this->stream_name){
+                if($val['AppName']==$this->channel->name && $val['StreamName']== $this->room->name){
                     $online= true;
                     break;
                 }
             }
             if($online){
-                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 推流中';
+                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
             }
-            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 已下线';
+            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> ' .__('touge-aliyun::live.push_end');
         });
 
 
@@ -142,18 +135,19 @@ class PlanController extends BaseAdminController
 
 
         $channel_options= Channel::all()->pluck('name', 'id');
-        $form->select('channel_id', $this->__['channel'])
+        $form->select('channel_id', __('touge-aliyun::live.channel'))
             ->options($channel_options)
             ->load('room_id', admin_url('admin-aliyun-live/room/rooms4channel'));
 
 
         $room_options= $this->fixEditOptions(request('plan'));
-        $form->select('room_id', $this->__['room'])->options($room_options);
+        $form->select('room_id', __('touge-aliyun::live.room'))->options($room_options);
 
 
-        $form->text('title', $this->__['title']);
-        $form->text('anchor', $this->__['anchor']);
-        $form->datetime('publish_at', $this->__['publish_at']);
+        $form->text('title', __('touge-aliyun::live.title'));
+        $form->text('anchor', __('touge-aliyun::live.anchor'));
+        $form->datetime('publish_at', __('touge-aliyun::live.publish_at'));
+        $form->datetime('end_at', __('touge-aliyun::live.end_at'));
 
         $form->disableViewCheck()->disableEditingCheck()->disableCreatingCheck()->disableReset();
         $form->tools(function(Form\Tools $tools){

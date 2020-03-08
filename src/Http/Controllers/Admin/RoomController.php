@@ -22,16 +22,6 @@ class RoomController extends BaseAdminController
 {
     use HasTrait;
 
-    protected $__= [
-        'status'=> '状态',
-        'title'=> '直播名称',
-        'app_name'=> '频道',
-        'stream_name'=> '房间',
-        'push_url'=> '推流域名',
-        'pull_url'=> '拉流域名',
-        'publish_at'=> '计划时间',
-    ];
-
 
     /**
      * @param Request $request
@@ -52,22 +42,22 @@ class RoomController extends BaseAdminController
 
 
         $grid->column('id', "#ID");
-        $grid->column('name', $this->__['stream_name'])->label('primary');
-        $grid->column('channel.name', $this->__['app_name'])->label('danger');
+        $grid->column('name', __('touge-aliyun::live.stream_name'))->label('primary');
+        $grid->column('channel.name', __('touge-aliyun::live.app_name'))->label('danger');
 
         $OnlineInfo= $this->live_online_info();
-        $grid->column('app-status', $this->__['status'])->display(function() use($OnlineInfo){
+        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo){
             $online= false;
             foreach((array)$OnlineInfo as $key=>$val){
-                if($val['AppName']==$this->app_name && $val['StreamName']== $this->stream_name){
+                if($val['AppName']==$this->channel->name && $val['StreamName']== $this->name){
                     $online= true;
                     break;
                 }
             }
             if($online){
-                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 推流中';
+                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
             }
-            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> 已下线';
+            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> ' . __('touge-aliyun::live.push_end');;
         });
 
         $grid->disableRowSelector()
@@ -88,8 +78,8 @@ class RoomController extends BaseAdminController
         $form = new Form(new Room());
 
         $channel_options= Channel::all()->pluck('name','id');
-        $form->select('channel_id', $this->__['app_name'])->options($channel_options);
-        $form->text('name', $this->__['stream_name'])->rules('required|min:3');
+        $form->select('channel_id', __('touge-aliyun::live.app_name'))->options($channel_options);
+        $form->text('name', __('touge-aliyun::live.stream_name'))->rules('required|min:3');
 
         $form->disableViewCheck()->disableEditingCheck()->disableCreatingCheck()->disableReset();
         $form->tools(function(Form\Tools $tools){
