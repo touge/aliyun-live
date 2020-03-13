@@ -9,7 +9,6 @@ return [
     'accessKeyId'=> '*',
     'accessKeySecret'=> '*',
 
-
     /**
      * 域名配置
      */
