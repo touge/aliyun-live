@@ -92,14 +92,17 @@ class PlanController extends BaseAdminController
         $grid->model()->orderBy('id', 'desc');
 
         $grid->column('publish_at', __('touge-aliyun::live.publish_at'));
-        $grid->column('anchor', __('touge-aliyun::live.anchor'))->label('default');
-        $grid->column('title', __('touge-aliyun::live.title'))->label('warning');
-        $grid->column('channel.name', __('touge-aliyun::live.channel'))->label('success');
-        $grid->column('room.name',__('touge-aliyun::live.room'))->label('primary');
         $grid->column('end_at', __('touge-aliyun::live.end_at'));
 
+        $grid->column('anchor', __('touge-aliyun::live.anchor'))->label('success');
+        $grid->column('title', __('touge-aliyun::live.title'))->label('warning');
+        $grid->column('channel.name', __('touge-aliyun::live.channel') . '/' . __('touge-aliyun::live.room'))->display(function(){
+            return $this->channel->name .'/'. $this->room->name;
+        })->label('default');
+//        $grid->column('room.name',__('touge-aliyun::live.room'))->label('primary');
+
         $OnlineInfo= $this->live_online_info();
-        $grid->column('app-status', __('touge-aliyun::live.statusl'))->display(function() use($OnlineInfo){
+        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo){
             $online= false;
             foreach((array)$OnlineInfo as $key=>$val){
                 if($val['AppName']==$this->channel->name && $val['StreamName']== $this->room->name){

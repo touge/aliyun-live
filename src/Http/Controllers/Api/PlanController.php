@@ -37,6 +37,9 @@ class PlanController extends BaseApiController
     }
 
     /**
+     *
+     * 流列表
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -51,12 +54,15 @@ class PlanController extends BaseApiController
 
 
     /**
+     *
+     * 获得当前流
+     *
      * @param Request $request
-     * @return mixed
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function check_streaming(Request $request){
-        $channel_name= $request->get('channel_name', 'the9edu');
-        $room_name= $request->get('room_name', '001');
+    public function stream(Request $request){
+        $channel_name= $request->get('channel', 'the9edu');
+        $room_name= $request->get('room', '001');
 
 
         $options= [
@@ -66,11 +72,18 @@ class PlanController extends BaseApiController
         ];
         $response= AlibabaLiveClient::DescribeLiveStreamsOnlineList($options);
 
-        $data= [
-            'is_streaming'=> $response['data']['TotalNum']>0 ?true :false
-        ];
+        $streaming= $response['data']['TotalNum']>0 ?true :false;
+        if($streaming){
+            $buildUrls= AlibabaLiveClient::liveUrlBuilder($channel_name, $room_name);
+            return $this->success($buildUrls['pull']);
+        }
+        return $this->response('直播未开始', 'failed');
 
-        return $this->success($data);
+//        $data= [
+//            'is_streaming'=> $response['data']['TotalNum']>0 ?true :false
+//        ];
+//
+//        return $this->success($response);
     }
 
     public function info(Request $request){
@@ -81,6 +94,16 @@ class PlanController extends BaseApiController
         }
 
         $plan= Plan::findOrFail($plan_id);
+        $data = [
+            'id'=> $plan_id,
+            'title'=> $plan->title,
+            'anchor'=> $plan->anchor,
+            'channel'=> $plan->channel->name,
+            'room'=> $plan->room->name,
+            'publish_at'=> $plan->publish_at
+        ];
+
+        return $this->success($data);
 
         $buildUrls= AlibabaLiveClient::liveUrlBuilder($plan->channel->name, $plan->room->name);
         $pull= $buildUrls['pull'];
@@ -90,6 +113,8 @@ class PlanController extends BaseApiController
                 'id'=> $plan_id,
                 'title'=> $plan->title,
                 'anchor'=> $plan->anchor,
+                'channel'=> $plan->channel->name,
+                'room'=> $plan->room->name,
                 'publish_at'=> $plan->publish_at
             ],
             'urls'=> $pull

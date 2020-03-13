@@ -18,7 +18,7 @@ Route::group([
      */
     $router->post("plan/fetch_list" ,"PlanController@fetch_list")->name('plan.fetch_list');
     $router->post("plan/stream_list" ,"PlanController@stream_list")->name('plan.stream_list');
-    $router->post("plan/check_streaming" ,"PlanController@check_streaming")->name('plan.check_streaming');
+    $router->post("plan/stream" ,"PlanController@stream")->name('plan.stream');
     $router->post("plan/info" ,"PlanController@info")->name('plan.info');
 
 });
