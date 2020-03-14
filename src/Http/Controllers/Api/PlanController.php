@@ -17,7 +17,9 @@ class PlanController extends BaseApiController
     public function fetch_list()
     {
         $select_filed= ['id','channel_id', 'room_id', 'title','anchor','publish_at','end_at'];
-        $_plans= Plan::where('end_at' ,'>' ,date('Y-m-d h:i:s'))->get($select_filed);
+        $_plans= Plan::where([
+            'customer_school_id'=> $this->user()->customer_school_id,
+        ])->where('end_at' ,'>' ,date('Y-m-d h:i:s'))->get($select_filed);
 
         $plans= [];
         foreach($_plans as $key=>$plan){
