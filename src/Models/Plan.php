@@ -9,9 +9,8 @@
 namespace Touge\AdminAliyunLive\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
 
-class Plan extends Model
+class Plan extends BaseModel
 {
     protected $table= 'touge_live_plans';
 

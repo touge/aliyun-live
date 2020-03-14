@@ -39,7 +39,6 @@ class PlanController extends BaseAdminController
         $show = new Show(Plan::findOrFail($id));
         $model= $show->getModel();
 
-
         $show->field('channel-name', __('touge-aliyun::live.channel'))->as(function(){
             return $this->channel->name;
         });
@@ -48,17 +47,24 @@ class PlanController extends BaseAdminController
         });
         $show->field('publish_at', __('touge-aliyun::live.publish_at'));
 
+
+        /**
+         * 频道、房间
+         */
+        $roomName= $this->addSchoolPrefix($model->room->name);
+        $channelName= $model->channel->name;
+
         /**
          * 当前频道，房间是否在线
          */
         $online_status= false;
         $options= [
-            'AppName'=> $model->channel->name,
-            'StreamName'=> $model->room->name
+            'AppName'=> $channelName,
+            'StreamName'=> $roomName
         ];
         $live_online_infos= $self->live_online_info($options);
         foreach($live_online_infos as $key=>$val){
-            if($val['AppName'] == $model->channel->name && $val['StreamName'] == $model->room->name)
+            if($val['AppName'] == $channelName && $val['StreamName'] == $roomName)
             {
                 $online_status= true;
                 break;
@@ -73,7 +79,7 @@ class PlanController extends BaseAdminController
         })->label('default');
 
 
-        $buildUrls= AlibabaLiveClient::liveUrlBuilder($model->channel->name, $model->room->name);
+        $buildUrls= AlibabaLiveClient::liveUrlBuilder($channelName, $roomName);
         Show::extend('pull_urls', PullUrls::class);
         $show->field('PULL-URLS', __('touge-aliyun::live.pull_url'))->pull_urls($buildUrls['pull']);
         
@@ -88,8 +94,12 @@ class PlanController extends BaseAdminController
     }
 
     protected function grid(){
+        $self= $this;
+
         $grid = new Grid(new Plan());
-        $grid->model()->orderBy('id', 'desc');
+        $grid->model()
+            ->where(['customer_school_id'=> $this->customer_school_id()])
+            ->orderBy('id', 'desc');
 
         $grid->column('publish_at', __('touge-aliyun::live.publish_at'));
         $grid->column('end_at', __('touge-aliyun::live.end_at'));
@@ -99,13 +109,15 @@ class PlanController extends BaseAdminController
         $grid->column('channel.name', __('touge-aliyun::live.channel') . '/' . __('touge-aliyun::live.room'))->display(function(){
             return $this->channel->name .'/'. $this->room->name;
         })->label('default');
-//        $grid->column('room.name',__('touge-aliyun::live.room'))->label('primary');
 
         $OnlineInfo= $this->live_online_info();
-        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo){
+        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo, $self){
             $online= false;
+            $channelName= $this->channel->name;
+            $roomName= $self->addSchoolPrefix($this->room->name);
+
             foreach((array)$OnlineInfo as $key=>$val){
-                if($val['AppName']==$this->channel->name && $val['StreamName']== $this->room->name){
+                if($val['AppName']==$channelName && $val['StreamName']== $roomName){
                     $online= true;
                     break;
                 }
@@ -135,6 +147,7 @@ class PlanController extends BaseAdminController
     protected function form()
     {
         $form = new Form(new Plan());
+        $form->hidden('customer_school_id')->default($this->customer_school_id());
 
 
         $channel_options= Channel::all()->pluck('name', 'id');
@@ -176,5 +189,16 @@ class PlanController extends BaseAdminController
             return $options;
         }
         return $options;
+    }
+
+
+    /**
+     * 将学校标识添加到数据前面，以防各学校之间的数据相互干扰
+     *
+     * @param $string
+     * @return string
+     */
+    public function addSchoolPrefix($string){
+        return 'CS-' . $this->customer_school_id() . '-' . $string;
     }
 }

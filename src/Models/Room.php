@@ -9,10 +9,9 @@
 namespace Touge\AdminAliyunLive\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Room extends Model
+class Room extends BaseModel
 {
     protected $table= 'touge_live_rooms';
     protected $guarded= ['id'];

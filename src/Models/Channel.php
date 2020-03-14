@@ -9,9 +9,8 @@
 namespace Touge\AdminAliyunLive\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
 
-class Channel extends Model
+class Channel extends BaseModel
 {
     protected $table= 'touge_live_channels';
 

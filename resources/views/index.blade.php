@@ -1,1 +1,1 @@
-Welcome to laravel-admin
+Welcome!

@@ -29,7 +29,10 @@ class RoomController extends BaseAdminController
      */
     public function room4channel(Request $request){
         $channel_id= $request->get('q');
-        return Room::where(['channel_id'=> $channel_id])->get(['id','name as text']);
+        return Room::where([
+            'customer_school_id'=> $this->customer_school_id(),
+            'channel_id'=> $channel_id
+        ])->get(['id','name as text']);
     }
 
     /**
@@ -38,7 +41,9 @@ class RoomController extends BaseAdminController
     protected function grid()
     {
         $grid = new Grid(new Room());
-        $grid->model()->orderBy('id','desc');
+        $grid->model()
+            ->where(['customer_school_id'=> $this->customer_school_id()])
+            ->orderBy('id','desc');
 
 
         $grid->column('id', "#ID");
@@ -76,8 +81,10 @@ class RoomController extends BaseAdminController
      */
     protected function form(){
         $form = new Form(new Room());
+        $form->hidden('customer_school_id')->default($this->customer_school_id());
 
-        $channel_options= Channel::all()->pluck('name','id');
+
+        $channel_options= Channel::where(['customer_school_id'=> $this->customer_school_id()])->get()->pluck('name','id');
         $form->select('channel_id', __('touge-aliyun::live.app_name'))->options($channel_options);
         $form->text('name', __('touge-aliyun::live.stream_name'))->rules('required|min:3');
 

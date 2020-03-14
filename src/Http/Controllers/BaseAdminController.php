@@ -8,6 +8,7 @@
 namespace Touge\AdminAliyunLive\Http\Controllers;
 
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 
 class BaseAdminController extends AdminController
@@ -41,5 +42,24 @@ class BaseAdminController extends AdminController
     {
         $content->breadcrumb(...$this->breadcrumb);
         return $this;
+    }
+
+
+    /**
+     * 当前用户信息
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    protected function user(){
+        return Admin::user();
+    }
+
+    /**
+     *
+     * 当前用户的校园客户ID
+     *
+     * @return mixed
+     */
+    protected function customer_school_id(){
+        return $this->user()->customer_school_id;
     }
 }

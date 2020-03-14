@@ -3,18 +3,10 @@
 namespace Touge\AdminAliyunLive\Http\Controllers\Admin;
 
 use Encore\Admin\Form;
-use Encore\Admin\Show;
-use Illuminate\Http\Request;
 use Touge\AdminAliyunLive\Models\Channel;
-use Touge\AdminAliyunLive\Models\LiveUrl;
 use Touge\AdminAliyunLive\Http\Controllers\BaseAdminController;
 
 
-use Touge\AdminAliyunLive\Supports\AlibabaLiveClient;
-use Touge\AdminAliyunLive\Supports\Shows\PullUrls;
-
-
-use Touge\AdminAliyunLive\Supports\Shows\PushUrl;
 use Touge\AdminOverwrite\Grid\Displayers\Actions;
 use Touge\AdminOverwrite\Grid\Grid;
 
@@ -41,7 +33,9 @@ class ChannelController extends BaseAdminController
     protected function grid()
     {
         $grid = new Grid(new Channel());
-        $grid->model()->orderBy('id','desc');
+        $grid->model()
+            ->where(['customer_school_id'=> $this->customer_school_id()])
+            ->orderBy('id','desc');
 
         $grid->column('name', __('touge-aliyun::live.app_name'))->label('danger');
 
@@ -73,8 +67,9 @@ class ChannelController extends BaseAdminController
         $domain= config('touge-aliyun-live.domain');
 
         $form = new Form(new Channel());
-        $form->text('name',  __('touge-aliyun::live.app_name'))->rules('required|min:3');
+        $form->hidden('customer_school_id')->default($this->customer_school_id());
 
+        $form->text('name',  __('touge-aliyun::live.app_name'))->rules('required|min:3');
         $form->text('pull_url', __('touge-aliyun::live.pull_url'))->default($domain['pull']['url'])->readonly();
         $form->text('push_url', __('touge-aliyun::live.push_url'))->default($domain['push']['url'])->readonly();
 

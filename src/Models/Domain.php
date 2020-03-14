@@ -11,8 +11,6 @@ namespace Touge\AdminAliyunLive\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Touge\AdminAliyunLive\Supports\AlibabaLiveClient;
-use Illuminate\Support\Facades\Request;
 
 
 /**
