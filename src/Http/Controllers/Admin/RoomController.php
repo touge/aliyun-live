@@ -13,8 +13,8 @@ use Encore\Admin\Form;
 use Illuminate\Http\Request;
 use Touge\AdminAliyunLive\Http\Controllers\BaseAdminController;
 use Touge\AdminAliyunLive\Models\Channel;
+use Touge\AdminAliyunLive\Models\Plan;
 use Touge\AdminAliyunLive\Models\Room;
-use Touge\AdminAliyunLive\Supports\AlibabaLiveClient;
 use Touge\AdminOverwrite\Grid\Displayers\Actions;
 use Touge\AdminOverwrite\Grid\Grid;
 
@@ -81,6 +81,7 @@ class RoomController extends BaseAdminController
      */
     protected function form(){
         $form = new Form(new Room());
+        $model= $form->model();
         $form->hidden('customer_school_id')->default($this->customer_school_id());
 
 
@@ -92,8 +93,33 @@ class RoomController extends BaseAdminController
         $form->tools(function(Form\Tools $tools){
             $tools->disableDelete()->disableView();
         });
-
-
         return $form;
     }
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        /**
+         * 检测关联数据
+         */
+        $planed= Plan::where(['room_id'=> $id])->count();
+        if($planed>0){
+            $response = [
+                'status'  => false,
+                'message' => '请先删除房间中的直播计划',
+            ];
+            return response()->json($response);
+        }
+
+
+        return $this->form()->destroy($id);
+    }
+
 }

@@ -9,6 +9,7 @@
 namespace Touge\AdminAliyunLive\Models;
 
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Room extends BaseModel
@@ -23,5 +24,14 @@ class Room extends BaseModel
     public function channel(): HasOne
     {
         return $this->hasOne(Channel::class ,'id', 'channel_id');
+    }
+
+    /**
+     * 计划列表
+     * @return HasMany
+     */
+    public function plans(): HasMany
+    {
+        return $this->hasMany(Plan::class, 'id', 'plan_id');
     }
 }
