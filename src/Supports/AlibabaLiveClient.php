@@ -209,13 +209,14 @@ class AlibabaLiveClient
      * 直播地址生成
      * @param $app_name
      * @param $stream_name
+     * @param $transcodeId
      * @return array
      */
-    public static function liveUrlBuilder($app_name, $stream_name)
+    public static function liveUrlBuilder($app_name, $stream_name ,$transcodeId='')
     {
         return [
             'push'=> static::__pushLiveUrlBuilder($app_name, $stream_name),
-            'pull'=> static::__pullLiveUrlBuilder($app_name, $stream_name),
+            'pull'=> static::__pullLiveUrlBuilder($app_name, $stream_name, $transcodeId),
         ];
     }
 
@@ -248,37 +249,95 @@ class AlibabaLiveClient
      * @param $config
      * @param $app_name
      * @param $stream_name
+     * @param $transcodeId
      *
      * @return array
      */
-    protected static function __pullLiveUrlBuilder($app_name, $stream_name)
+    protected static function __pullLiveUrlBuilder($app_name, $stream_name, $transcodeId='')
     {
         $config= config('touge-aliyun-live.domain');
-        /**
-         * 拉游配置
-         */
-        $pull_cdn = $config['pull']['url'];
-        $pull_key = $config['pull']['auth_key'];
-        $pull_expire_time = time() + $config['pull']['expire'];
 
-        $strviewrtmp    = "/{$app_name}/{$stream_name}-{$pull_expire_time}-0-0-{$pull_key}";
-        $strviewflv     = "/{$app_name}/{$stream_name}.flv-{$pull_expire_time}-0-0-{$pull_key}";
-        $strviewm3u8    = "/{$app_name}/{$stream_name}.m3u8-{$pull_expire_time}-0-0-{$pull_key}";
-
-        return [
-            'rtmp'=> [
-                'type'=> 'rtmp',
-                'url'=> "rtmp://{$pull_cdn}/{$app_name}/{$stream_name}?auth_key={$pull_expire_time}-0-0-".md5($strviewrtmp)
+        $data= [
+            'original'=> [
+                'rtmp'=> self::rtmp_pull_url($app_name, $stream_name, $config['pull'], 'original'),
+                'm3u8'=> self::m3u8_pull_url($app_name, $stream_name, $config['pull'], 'original')
             ],
-            'flv'=> [
-                'type'=> 'flv',
-                'url'=> "http://{$pull_cdn}/{$app_name}/{$stream_name}.flv?auth_key={$pull_expire_time}-0-0-".md5($strviewflv)
-            ],
-            'm3u8'=> [
-                'type'=> 'm3u8',
-                "url"=> "http://{$pull_cdn}/{$app_name}/{$stream_name}.m3u8?auth_key={$pull_expire_time}-0-0-".md5($strviewm3u8)
-            ]
         ];
+
+        if($transcodeId){
+            $transcode_array= explode(',', $transcodeId);
+
+            $transcode= [];
+            foreach($transcode_array as $type){
+                $row= [
+                    'rtmp'=> self::rtmp_pull_url($app_name, $stream_name, $config['pull'], $type),
+                    'm3u8'=> self::m3u8_pull_url($app_name, $stream_name, $config['pull'], $type)
+                ];
+                $data[$type]= $row;
+            }
+        }
+        return $data;
+
+//        $original= [
+//            'rtmp'=> self::rtmp_pull_url(),
+//            'm3u8'=> "http://{$pull_url_prefix}.flv?auth_key={$pull_expire_time}-0-0-".md5($strviewflv)
+//        ];
+
+//        return [
+//            'rtmp'=> [
+//                'type'=> 'rtmp',
+//                'url'=> "rtmp://{$pull_cdn}/{$app_name}/{$stream_name}?auth_key={$pull_expire_time}-0-0-".md5($strviewrtmp)
+//            ],
+//            'flv'=> [
+//                'type'=> 'flv',
+//                'url'=> "http://{$pull_cdn}/{$app_name}/{$stream_name}.flv?auth_key={$pull_expire_time}-0-0-".md5($strviewflv)
+//            ],
+//            'm3u8'=> [
+//                'type'=> 'm3u8',
+//                "url"=> "http://{$pull_cdn}/{$app_name}/{$stream_name}.m3u8?auth_key={$pull_expire_time}-0-0-".md5($strviewm3u8)
+//            ]
+//        ];
+    }
+
+    /**
+     * rtmp 拉流地址生成
+     *
+     * @param $app_name
+     * @param $stream_name
+     * @param $config
+     * @param string $type
+     * @return string
+     */
+    protected static function rtmp_pull_url($app_name, $stream_name, $config, $type= 'original'){
+        $pull_expire_time = time() + $config['expire'];
+
+        if ($type != 'original') {
+            $stream_name.= "_{$type}";
+        }
+
+        $str_view_rtmp= "/{$app_name}/{$stream_name}-{$pull_expire_time}-0-0-{$config['auth_key']}";
+        $rtmp_url= "rtmp://{$config['url']}/{$app_name}/{$stream_name}?auth_key={$pull_expire_time}-0-0-".md5($str_view_rtmp);
+        return $rtmp_url;
+    }
+
+    /**
+     * m3u8 拉流地址生成
+     *
+     * @param $app_name
+     * @param $stream_name
+     * @param $config
+     * @param string $type
+     * @return string
+     */
+    protected static function m3u8_pull_url($app_name, $stream_name, $config, $type= 'original'){
+        $pull_expire_time = time() + $config['expire'];
+
+        if ($type != 'original') {
+            $stream_name.= "_{$type}";
+        }
+        $str_view_m3u8= "/{$app_name}/{$stream_name}.m3u8-{$pull_expire_time}-0-0-{$config['auth_key']}";
+        $m3u8_url= "http://{$config['url']}/{$app_name}/{$stream_name}.m3u8?auth_key={$pull_expire_time}-0-0-".md5($str_view_m3u8);
+        return $m3u8_url;
     }
 
 

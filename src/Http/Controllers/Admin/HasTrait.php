@@ -24,8 +24,12 @@ trait HasTrait
             $options= array_merge($options, $params);
         }
 
-        $response= AlibabaLiveClient::DescribeLiveStreamsOnlineList($options);
-        $OnlineInfo= $response['data']['OnlineInfo']['LiveStreamOnlineInfo'];
+        try{
+            $response= AlibabaLiveClient::DescribeLiveStreamsOnlineList($options);
+            $OnlineInfo= $response['data']['OnlineInfo']['LiveStreamOnlineInfo'];
+        }catch (\Exception $e){
+            $OnlineInfo= [];
+        }
         return $OnlineInfo;
     }
 }

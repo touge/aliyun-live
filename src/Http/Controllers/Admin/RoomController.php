@@ -47,23 +47,23 @@ class RoomController extends BaseAdminController
 
 
         $grid->column('id', "#ID");
-        $grid->column('name', __('touge-aliyun::live.stream_name'))->label('primary');
         $grid->column('channel.name', __('touge-aliyun::live.app_name'))->label('danger');
+        $grid->column('name', __('touge-aliyun::live.stream_name'))->label('primary');
 
-        $OnlineInfo= $this->live_online_info();
-        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo){
-            $online= false;
-            foreach((array)$OnlineInfo as $key=>$val){
-                if($val['AppName']==$this->channel->name && $val['StreamName']== $this->name){
-                    $online= true;
-                    break;
-                }
-            }
-            if($online){
-                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
-            }
-            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> ' . __('touge-aliyun::live.push_end');;
-        });
+//        $OnlineInfo= $this->live_online_info();
+//        $grid->column('app-status', __('touge-aliyun::live.status'))->display(function() use($OnlineInfo){
+//            $online= false;
+//            foreach((array)$OnlineInfo as $key=>$val){
+//                if($val['AppName']==$this->channel->name && $val['StreamName']== $this->name){
+//                    $online= true;
+//                    break;
+//                }
+//            }
+//            if($online){
+//                return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
+//            }
+//            return '<span class="label label-warning" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> ' . __('touge-aliyun::live.push_end');;
+//        });
 
         $grid->disableRowSelector()
             ->disableFilter()

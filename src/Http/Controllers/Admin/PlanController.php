@@ -71,7 +71,7 @@ class PlanController extends BaseAdminController
             }
         }
 
-        $show->field('online-status', __('touge-aliyun::live.statusl'))->as(function() use($online_status){
+        $show->field('online-status', __('touge-aliyun::live.status'))->as(function() use($online_status){
             if($online_status){
                 return '<span class="label label-success" style="width: 8px;height: 8px;padding: 0;border-radius: 50%;display: inline-block;"></span> '. __('touge-aliyun::live.pushing');
             }
@@ -80,9 +80,9 @@ class PlanController extends BaseAdminController
 
 
         $buildUrls= AlibabaLiveClient::liveUrlBuilder($channelName, $roomName);
-        Show::extend('pull_urls', PullUrls::class);
-        $show->field('PULL-URLS', __('touge-aliyun::live.pull_url'))->pull_urls($buildUrls['pull']);
-        
+//        Show::extend('pull_urls', PullUrls::class);
+//        $show->field('PULL-URLS', __('touge-aliyun::live.pull_url'))->pull_urls($buildUrls['pull']);
+
         Show::extend('push_url', PushUrl::class);
         $show->field('PUSH-URL', __('touge-aliyun::live.push_url'))->push_url($buildUrls['push']);
 

@@ -7,6 +7,7 @@ use Touge\AdminAliyunLive\Models\Channel;
 use Touge\AdminAliyunLive\Http\Controllers\BaseAdminController;
 
 
+use Touge\AdminAliyunLive\Models\Room;
 use Touge\AdminOverwrite\Grid\Displayers\Actions;
 use Touge\AdminOverwrite\Grid\Grid;
 
@@ -38,6 +39,13 @@ class ChannelController extends BaseAdminController
             ->orderBy('id','desc');
 
         $grid->column('name', __('touge-aliyun::live.app_name'))->label('danger');
+//        $grid->column('transcoded', __('touge-aliyun::live.transcoded'))->using([
+//            0 => 'N',
+//            1 => 'Y',
+//        ],'未知')->dot([
+//            0=> 'danger',
+//            1=> 'success',
+//        ]);
 
         $grid->column('pull_url', __('touge-aliyun::live.pull_url'));
         $grid->column('push_url', __('touge-aliyun::live.push_url'));
@@ -70,6 +78,7 @@ class ChannelController extends BaseAdminController
         $form->hidden('customer_school_id')->default($this->customer_school_id());
 
         $form->text('name',  __('touge-aliyun::live.app_name'))->rules('required|min:3');
+//        $form->switch('transcoded',  __('touge-aliyun::live.transcoded'))->help(__('touge-aliyun::live.help.transcoded'));
         $form->text('pull_url', __('touge-aliyun::live.pull_url'))->default($domain['pull']['url'])->readonly();
         $form->text('push_url', __('touge-aliyun::live.push_url'))->default($domain['push']['url'])->readonly();
 
@@ -80,6 +89,30 @@ class ChannelController extends BaseAdminController
 
 
         return $form;
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        /**
+         * 检测关联数据
+         */
+        $planed= Room::where(['channel_id'=> $id])->count();
+        if($planed>0){
+            $response = [
+                'status'  => false,
+                'message' => '请先删除频道中的房间',
+            ];
+            return response()->json($response);
+        }
+
+        return $this->form()->destroy($id);
     }
 
 }

@@ -66,7 +66,6 @@ class PlanController extends BaseApiController
         $channel_name= $request->get('channel', 'the9edu');
         $room_name= $request->get('room', '001');
 
-
         $options= [
             'DomainName'=> config('touge-aliyun-live.domain.push.url'),
             'AppName'=> $channel_name,
@@ -74,19 +73,29 @@ class PlanController extends BaseApiController
         ];
         $response= AlibabaLiveClient::DescribeLiveStreamsOnlineList($options);
 
-        $streaming= $response['data']['TotalNum']>0 ?true :false;
+        $data= $response['data'];
+        $streaming= $data['TotalNum']>0 ?true :false;
         if($streaming){
-            $buildUrls= AlibabaLiveClient::liveUrlBuilder($channel_name, $room_name);
+            $LiveStreamOnlineInfo= $data['OnlineInfo']['LiveStreamOnlineInfo'];
+
+            /**
+             * 检测当前频道是否为转码模板
+             */
+            $transcodeId= '';
+            foreach($LiveStreamOnlineInfo as $onlineInfo){
+                if ($channel_name == $onlineInfo['AppName'] && $room_name == $onlineInfo['StreamName']){
+                    if (array_key_exists('TranscodeId', $onlineInfo)){
+                        $transcodeId= $onlineInfo['TranscodeId'];
+                        break;
+                    }
+                }
+            }
+            $buildUrls= AlibabaLiveClient::liveUrlBuilder($channel_name, $room_name, $transcodeId);
             return $this->success($buildUrls['pull']);
         }
         return $this->response('直播未开始', 'failed');
-
-//        $data= [
-//            'is_streaming'=> $response['data']['TotalNum']>0 ?true :false
-//        ];
-//
-//        return $this->success($response);
     }
+
 
     public function info(Request $request){
 
@@ -103,23 +112,6 @@ class PlanController extends BaseApiController
             'channel'=> $plan->channel->name,
             'room'=> $plan->room->name,
             'publish_at'=> $plan->publish_at
-        ];
-
-        return $this->success($data);
-
-        $buildUrls= AlibabaLiveClient::liveUrlBuilder($plan->channel->name, $plan->room->name);
-        $pull= $buildUrls['pull'];
-
-        $data= [
-            'plan'=> [
-                'id'=> $plan_id,
-                'title'=> $plan->title,
-                'anchor'=> $plan->anchor,
-                'channel'=> $plan->channel->name,
-                'room'=> $plan->room->name,
-                'publish_at'=> $plan->publish_at
-            ],
-            'urls'=> $pull
         ];
 
         return $this->success($data);

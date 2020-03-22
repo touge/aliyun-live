@@ -10,6 +10,7 @@ return [
     'live_plan'=> '直播计划',
     'status'=> '状态',
     'channel'=> '频道',
+    'transcoded'=> '转码',
     'room'=> '房间',
     'title'=> '名称',
     'anchor'=> '主讲',
@@ -21,4 +22,7 @@ return [
     'pull_url'=> '拉流地址',
     'pushing'=> '推流中',
     'push_end'=> '已停止',
+    'help'=> [
+        'transcoded'=> '如果是，请将此频道在阿里云设置转码模板。直播转码为收费服务'
+    ]
 ];
