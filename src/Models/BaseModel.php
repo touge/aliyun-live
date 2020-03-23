@@ -19,7 +19,7 @@ class BaseModel extends Model
 
     public function __construct(array $attributes = [])
     {
-        $connection= config('touge-admin-examination.database.connection');
+        $connection= config('touge-aliyun-live.database.connection');
         $this->setConnection($connection);
         parent::__construct($attributes);
     }
