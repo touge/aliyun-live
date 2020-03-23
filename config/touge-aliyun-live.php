@@ -10,11 +10,11 @@ return [
      * 数据库链接配置，需要在database.connections中进行配置，参考database.connections.mysql配置
      */
     'database'=> [
-        'connection'=> 'main_system',
+        'connection'=> env('ALIYUN_LIVE_DB_CONNECTION','main_system'),
     ],
 
-    'accessKeyId'=> 'LTAI4FdWxvEgfbEYaA238XjH',
-    'accessKeySecret'=> 'ke489lTWyVyIeHgQw1KrNZRMxOFJVp',
+    'accessKeyId'=> env('ALIYUN_LIVE_KEY', ''),
+    'accessKeySecret'=> env('ALIYUN_LIVE_SECRET', ''),
 
 
     /**
@@ -22,14 +22,14 @@ return [
      */
     'domain'=> [
         'pull'=> [
-            'auth_key'=> 'Xm2VydS4El',
-            'url'=> 'pull.live.the9edu.com',
-            'expire'=> 10800, //三个小时
+            'auth_key'=> env('ALIYUN_LIVE_PULL_KEY', ''),
+            'url'=> env('ALIYUN_LIVE_PULL_URL', ''),
+            'expire'=> env('ALIYUN_LIVE_PULL_EXPIRE', 10800), //三个小时
         ],
         'push'=> [
-            'auth_key'=> 'Xm2VydS4El',
-            'url'=> 'push.live.the9edu.com',
-            'expire'=> 10800,
+            'auth_key'=> env('ALIYUN_LIVE_PUSH_KEY', ''),
+            'url'=> env('ALIYUN_LIVE_PUSH_URL', ''),
+            'expire'=> env('ALIYUN_LIVE_PUSH_EXPIRE', 10800),
         ]
     ],
 ];
